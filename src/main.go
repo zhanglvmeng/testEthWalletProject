@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/big"
+	"strings"
 	"time"
 )
 
@@ -339,7 +340,7 @@ func getTheLastestBlock()  {
 			txCount := 0
 			for _, trans := range block.Transactions() {
 				fmt.Println("遍历第", txCount, "个交易===================================")
-				//fmt.Println("交易的hash值：", hex.EncodeToString(trans.Hash().Bytes()))
+				fmt.Println("交易的hash值：", hex.EncodeToString(trans.Hash().Bytes()))
 				// 获取收据信息
 				trans.RawSignatureValues()
 				receipt, err := client.TransactionReceipt(context.Background(), trans.Hash())
@@ -379,10 +380,16 @@ func getTheLastestBlock()  {
 					topics := log.Topics
 					topicLen := len(topics)
 					if topicLen == 3 {
-						fmt.Println("from: ", topics[1].String())
-						fmt.Println("to:", topics[2].String())
-					} else {
+						if strings.Compare(topics[0].String(), "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef") == 0 {
+							fmt.Println("keccak: ", topics[0].String())
+							fmt.Println("from: ", topics[1].String())
+							fmt.Println("to:", topics[2].String())
+						} else {
+							fmt.Println("topic的长度为3 ，但是不是ERC20交易，跳过。。。。。。")
+						}
+					} else if  topicLen == 1 || topicLen == 2 {
 						fmt.Println("Topic 数量为", topicLen, " 不足3个，跳过。。。。。")
+						fmt.Println("不合法： 第一个字段是", topics[0].String())
 					}
 				}
 				time.Sleep(time.Millisecond * 50)
