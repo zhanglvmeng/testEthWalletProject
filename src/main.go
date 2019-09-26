@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
@@ -330,17 +329,17 @@ func getTheLastestBlock()  {
 			}
 
 			//fmt.Println(block.Hash().Hex())        // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
-			fmt.Println(block.Number().Uint64())   // 3477413
+			fmt.Println("区块编号：", block.Number().Uint64())   // 3477413
 			//fmt.Println(block.Time())     // 1529525947
 			//fmt.Println(block.Nonce())             // 130524141876765836
 			transLen := len(block.Transactions())
-			fmt.Println(transLen) // 7
+			fmt.Println("区块中包含的交易数量：", transLen) // 7
 			// 遍历交易
 			fmt.Println("开始遍历transaction.........")
 			txCount := 0
 			for _, trans := range block.Transactions() {
 				fmt.Println("遍历第", txCount, "个交易===================================")
-				fmt.Println("交易的hash值：", hex.EncodeToString(trans.Hash().Bytes()))
+				//fmt.Println("交易的hash值：", hex.EncodeToString(trans.Hash().Bytes()))
 				// 获取收据信息
 				trans.RawSignatureValues()
 				receipt, err := client.TransactionReceipt(context.Background(), trans.Hash())
@@ -348,15 +347,15 @@ func getTheLastestBlock()  {
 					fmt.Println("从交易", hex.EncodeToString(trans.Hash().Bytes()), "获取收据 失败  :", err)
 					continue
 				}
-				fmt.Println("================收据信息==================")
-				receiptJson, err := json.Marshal(receipt)
-				if err == nil {
-					fmt.Println(string(receiptJson))
-				} else {
-					fmt.Println("收据转json失败, error", err)
-					txCount++
-					continue
-				}
+				//fmt.Println("================收据信息==================")
+				//receiptJson, err := json.Marshal(receipt)
+				//if err == nil {
+				//	fmt.Println(string(receiptJson))
+				//} else {
+				//	fmt.Println("收据转json失败, error", err)
+				//	txCount++
+				//	continue
+				//}
 
 				receiptLog := (*receipt).Logs
 				if len(receiptLog) == 0 {
@@ -364,24 +363,26 @@ func getTheLastestBlock()  {
 					fmt.Println("收据信息中没有Log, 跳过这次的交易。。。。。")
 					continue
 				}
-				// 打印log
-				receiptLogJson, err := json.Marshal(receiptLog)
-				if err != nil {
-					txCount++
-					fmt.Println("收据信息中Log格式有问题, 跳过这次的交易。。。。。")
-					continue
-				} else {
-					fmt.Println("收据的日志为 ", string(receiptLogJson))
-				}
+
+				//// 打印log信息
+				//receiptLogJson, err := json.Marshal(receiptLog)
+				//if err != nil {
+				//	txCount++
+				//	fmt.Println("收据信息中Log格式有问题, 跳过这次的交易。。。。。")
+				//	continue
+				//} else {
+				//	fmt.Println("收据的日志为 ", string(receiptLogJson))
+				//}
 				for _, log := range receiptLog {
 					contractAddr := (*log).Address
 					fmt.Println("合约地址: ", contractAddr.String())
 					topics := log.Topics
-					if len(topics) == 3 {
+					topicLen := len(topics)
+					if topicLen == 3 {
 						fmt.Println("from: ", topics[1].String())
 						fmt.Println("to:", topics[2].String())
 					} else {
-						fmt.Println("Topic 数量不足3个，跳过。。。。。")
+						fmt.Println("Topic 数量为", topicLen, " 不足3个，跳过。。。。。")
 					}
 				}
 				time.Sleep(time.Millisecond * 50)
