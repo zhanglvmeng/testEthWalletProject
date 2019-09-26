@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
@@ -22,7 +23,7 @@ import (
  */
 func createKs() {
 	// 注意路径要写到 keystore 这一层，而不是其上一层。 比如应该这样 /Users/zhangpeng/ethData/keystore
-	ks := keystore.NewKeyStore("/Users/zhangpeng/ethData/keystore", keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore("/Users/zhangpeng/ethData", keystore.StandardScryptN, keystore.StandardScryptP)
 	password := "root"
 	account, err := ks.NewAccount(password)
 	if err != nil {
@@ -34,7 +35,7 @@ func createKs() {
 
 func importKs() {
 	// 要引入的keystore的json文件. 这个demo中随便写了一个key文件地址。具体引入时写真实的地址即可。
-	file := "/Users/zhangpeng/ethData/UTC--2019-09-17T04-41-16.605557000Z--b0f2804f7401076eaf77c4a44782f2a13a9aab89"
+	file := "/Users/zhangpeng/ethData/UTC--2019-09-17T09-43-53.829296000Z--24aa682c19454e8346d692421e9e1fb305936599"
 	// keydir 同样要写入到keystore这一层
 	ks := keystore.NewKeyStore("/Users/zhangpeng/ethData/keystore", keystore.StandardScryptN, keystore.StandardScryptP)
 
@@ -326,11 +327,40 @@ func getTheLastestBlock()  {
 				log.Fatal(err)
 			}
 
-			fmt.Println(block.Hash().Hex())        // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
+			//fmt.Println(block.Hash().Hex())        // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
 			fmt.Println(block.Number().Uint64())   // 3477413
-			fmt.Println(block.Time())     // 1529525947
+			//fmt.Println(block.Time())     // 1529525947
 			fmt.Println(block.Nonce())             // 130524141876765836
-			fmt.Println(len(block.Transactions())) // 7
+			transLen := len(block.Transactions())
+			fmt.Println(transLen) // 7
+			// 遍历交易
+			fmt.Println("开始遍历transaction.........")
+			txCount := 0
+			for _, trans := range block.Transactions() {
+				fmt.Println("遍历第", txCount, "个交易===================================")
+				fmt.Println("交易的hash值：", hex.EncodeToString(trans.Hash().Bytes()))
+				// 获取收据信息
+				receipt, err := client.TransactionReceipt(context.Background(), trans.Hash())
+				if err != nil {
+					fmt.Println("从交易", hex.EncodeToString(trans.Hash().Bytes()), "获取收据 失败  :", err)
+					txCount++
+					continue
+				}
+				receiptLog := receipt.Logs
+				for _, log := range receiptLog {
+					contractAddr := log.Address
+					fmt.Println("contract address: ", hex.EncodeToString(contractAddr.Bytes()))
+					topics := log.Topics
+					if !(len(topics) < 3) {
+						fmt.Println("from: ", hex.EncodeToString(topics[1].Bytes()))
+						fmt.Println("to:", hex.EncodeToString(topics[2].Bytes()))
+					}
+				}
+
+				txCount++
+			}
+
+
 		}
 	}
 }
@@ -343,7 +373,7 @@ func main() {
 	//createKs()
 	//importKs()
 	//getBlockInfo()
-	//sendTransaction("/Users/zhangpeng/ethData/keystore/UTC--2019-09-02T01-02-03.970484000Z--196c48f6117328e8d733f3c7de50a681fae8ab56", "", "0xb0f2804f7401076eaf77c4a44782f2a13a9aab89", 9)
+	//sendTransaction("/Users/zhangpeng/ethData/keystore/UTC--2019-09-17T09-45-19.896945000Z--24aa682c19454e8346d692421e9e1fb305936599", "root", "0x33c65279e413e401ff56471a4714e9eb8fd3fc72", 3)
 	getTheLastestBlock()
 
 }
