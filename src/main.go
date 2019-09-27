@@ -322,6 +322,7 @@ func getTheLastestBlock()  {
 		case err := <-sub.Err():
 			log.Fatal(err)
 		case header := <-headers:
+			fmt.Println("区块来了~ hash: ")
 			fmt.Println(header.Hash().Hex()) // 0xbc10defa8dda384c96a17640d84de5578804945d347072e091b4e5f390ddea7f
 
 			block, err := client.BlockByHash(context.Background(), header.Hash())
