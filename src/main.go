@@ -37,6 +37,7 @@ func createKs() {
 
 func importKs() {
 	// 要引入的keystore的json文件. 这个demo中随便写了一个key文件地址。具体引入时写真实的地址即可。
+
 	file := "/Users/zhangpeng/ethData/UTC--2019-09-17T09-43-53.829296000Z--24aa682c19454e8346d692421e9e1fb305936599"
 	// keydir 同样要写入到keystore这一层
 	ks := keystore.NewKeyStore("/Users/zhangpeng/ethData/keystore", keystore.StandardScryptN, keystore.StandardScryptP)
@@ -64,7 +65,7 @@ func importKs() {
 	获取client
  */
 func getRpcClient() (*rpc.Client, error) {
-	client, err := rpc.Dial("http://localhost:8545")
+	client, err := rpc.Dial("http://localhost:30303")
 	return client, err
 }
 
@@ -126,7 +127,7 @@ func generateNewRawWallet()  {
 }
 
 func getBlockInfo()  {
-	client, err := ethclient.Dial("http://localhost:8545") // 本地
+	client, err := ethclient.Dial("http://localhost:30303") // 本地
 	//client, err := ethclient.Dial("https://mainnet.infura.io") // 主网地址
 	if err != nil {
 		log.Fatal(err)
@@ -411,8 +412,8 @@ func main() {
 	//generateNewRawWallet()
 	//createKs()
 	//importKs()
-	//getBlockInfo()
+	getBlockInfo()
 	//sendTransaction("/Users/zhangpeng/ethData/keystore/UTC--2019-09-17T09-45-19.896945000Z--24aa682c19454e8346d692421e9e1fb305936599", "root", "0x33c65279e413e401ff56471a4714e9eb8fd3fc72", 3)
-	getTheLastestBlock()
+	//getTheLastestBlock()
 
 }
